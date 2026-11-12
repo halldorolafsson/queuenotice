@@ -1,0 +1,27 @@
+{
+  "name": "queuenotice",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Trafikkvarsling for egne veistrekninger i Trøndelag",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build": "npm run build -w frontend && npm run build -w backend",
+    "start": "npm run start -w backend",
+    "test": "npm run test -w backend",
+    "typecheck": "npm run typecheck -w backend && npm run typecheck -w frontend",
+    "db:migrate": "npm run db:migrate -w backend",
+    "poll": "npm run poll -w backend",
+    "user": "npm run user -w backend --",
+    "transfer": "npm run transfer -w backend --"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

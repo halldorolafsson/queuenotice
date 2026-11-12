@@ -1,0 +1,111 @@
+Du er en erfaren programvarearkitekt og fullstack-utvikler. Hjelp meg å bygge en app som overvåker trafikken på veistrekningene jeg kjører på, og varsler meg om kø, vesentlige forsinkelser og stengte veier. Jeg
+
+**Formål og rammer**
+
+- Appen skal brukes i Norge, spesielt i Trøndelag.
+- Første versjon er til personlig bruk, men arkitekturen bør kunne støtte flere brukere senere.
+- Grensesnittet skal være på norsk og fungere godt på mobil.
+- Velg og begrunn egnet teknologi og arkitektur. Vurder en mobilvennlig webapp/PWA før du eventuelt anbefaler en native app.
+- Prioriter en enkel, driftbar løsning med lave kostnader fremfor unødvendig kompleksitet.
+- Jeg skal også lære grunndig hvordan en slik app lages uten bruk av agenter. Derfor må vi diskutere og du må forklare enkelt hvilke oppgaver som må gjøres, hvilke valg må tas (ikke alle detaljer men gjerne forklare hvordan appen er bygd opp og hvorfor du foreslår slik du gjør (det kan hende at vi endrer denne instruksen underveis). 
+- Appen skal etter endt utvikling kunne kjøres i google cloud (GCP). 
+- Den kan inneholde hjelp fra AI assistenter f.eks med mulighet til å snakke inn kommandoer om hvilke veier skal overvåkes, at en agent leser opp varslinger og lignende. Det betyr at på pc og telefon må få tilgang til mikrofon og høytaler.Jeg har brukt open ai 4 mini til slike oppgaver før. Se prosjekt neste-steg for detaljer
+
+**1. Overvåkingslister og veistrekninger**
+Jeg skal kunne:
+
+- Opprette, navngi, redigere og slette lister, for eksempel «Til jobb», «Hjem fra jobb» og «Helgeturer».
+- Legge flere veistrekninger eller ruter i hver liste.
+- Angi veinummer, startsted, sluttsted og kjøreretning. Et veinummer alene skal ikke innebære overvåking av hele veien.
+- Overvåke flere veier langs samme rute.
+- Aktivere og pause overvåking per liste eller strekning.
+- Velge ukedager og tidsrom for overvåking, i tidssonen Europe/Oslo.
+- Beholde lister og innstillinger mellom økter gjennom varig lagring.
+**2. Trafikkilder**
+Undersøk gjeldende offisiell dokumentasjon og faktisk tilgjengelighet for:
+
+- Statens vegvesen: trafikkmeldinger, hendelser og reisetider.
+- Google Maps Platform: trafikkbaserte reisetider og beregning av forsinkelse.
+- Politiet: relevante trafikkhendelser fra tilgjengelige offisielle tjenester.
+- Lokalaviser i Trøndelag: supplerende informasjon via tillatte API-er eller feeds.
+Skill mellom målte eller estimerte køforsinkelser og meldinger om hendelser som kan føre til kø. En ulykke eller et veiarbeid skal ikke automatisk presenteres som bekreftet kø.
+
+For hver kilde, dokumenter:
+
+- Hvilke relevante data den tilbyr og geografisk dekning.
+- Krav til registrering, nøkler, kostnader og bruksbegrensninger.
+- Oppdateringsfrekvens, tidsstempler og kjente begrensninger.
+- Hvordan kilden kan integreres lovlig og pålitelig.
+Ikke anta at en kilde har et åpent API. Ikke bruk uoffisielle Google-endepunkter eller omgå betalingsmurer. Prioriter én fungerende primærkilde i MVP-en og gjør øvrige kilder utvidbare.
+
+**3. Varsling**
+Appen skal støtte push og e-post. Anbefal hvilken kanal som bør implementeres først, og forklar eventuelle begrensninger på iPhone og andre plattformer.
+
+Jeg skal kunne:
+
+- Velge varslingskanal og e-postadresse.
+- Velge hvilke hendelser som utløser varsling.
+- Sette en forsinkelsesterskel, for eksempel minst 10 minutter, der datakilden støtter dette.
+- Velge å få beskjed når en tidligere hendelse er over.
+Varslene skal:
+
+- Inneholde strekning, retning, hendelse, eventuell estimert forsinkelse, kilde og oppdateringstid.
+- Unngå gjentatte meldinger om samme hendelse.
+- Sendes på nytt ved vesentlig endring, etter tydelige regler.
+- Respektere valgte tidsrom og pauset overvåking.
+Overvåkingen og varslingen skal fungere på serveren selv om appen er lukket. Ikke baser dette på at en nettleserfane holdes åpen.
+
+**4. Trafikkoversikt**
+Lag en oversikt som viser:
+
+- Mine lister og veistrekninger.
+- Siste kjente trafikkstatus og relevante hendelser.
+- Eventuell forsinkelse, dersom den kan beregnes.
+- Kilde, tidspunkt for siste vellykkede oppdatering og status for datatilgangen.
+Skill tydelig mellom:
+
+- Ingen relevante hendelser registrert.
+- Registrert kø eller hendelse.
+- Utdaterte data.
+- Manglende data eller kildefeil.
+- Pauset overvåking.
+Manglende trafikkmeldinger skal ikke automatisk tolkes som fri flyt. Eksempeldata skal merkes tydelig og aldri presenteres som sanntidsdata.
+
+**5. Arkitektur og kvalitet**
+Strukturer løsningen med tydelig skille mellom:
+
+- Brukergrensesnitt.
+- Lagring av lister, strekninger og varslingsinnstillinger.
+- Integrasjoner mot trafikkilder.
+- Geografisk og retningsbestemt matching mellom hendelser og overvåkede strekninger.
+- Bakgrunnsjobber og oppdateringer.
+- Varslingsregler og utsending.
+Ta hensyn til:
+
+- Normalisering og deduplisering av hendelser fra flere kilder.
+- Hendelsers starttid, sluttid, utløp og endringer.
+- Rate limits, tidsavbrudd, gjenforsøk og kildefeil.
+- Sikker lagring av hemmeligheter på serveren.
+- Beskyttelse av personlige ruter og e-postadresser.
+- Logging som gjør feil i innhenting og varsling forståelige.
+- Kostnadskontroll for API-kall og varslinger.
+Bruk tester der de gir reell verdi, spesielt for matching av strekninger, tidsrom, forsinkelsesterskler og duplikatvarsling. Bruk testdata for lokale tester uten å sende ekte varsler.
+
+**Arbeidsmåte**
+
+1. Undersøk eksisterende prosjekt og eventuelle AGENTS.md-instruksjoner før du endrer filer.
+2. Still maksimalt tre konkrete spørsmål hvis svarene vesentlig påvirker løsningen. Gjør ellers rimelige antakelser og dokumenter dem.
+3. Undersøk trafikkildene før du låser arkitekturen.
+4. Presenter en kort anbefaling med teknologistack, datakilder, lagringsmodell, bakgrunnsjobber, varslingskanal, driftsalternativ og kostnadsdrivere.
+5. Implementer deretter en fungerende MVP trinnvis. Ikke stopp ved et arkitekturforslag.
+6. Hvis tilgangsnøkler mangler, bygg integrasjonsgrensesnitt og tydelig merket demomodus. Forklar nøyaktig hva som må til for å aktivere ekte trafikkdata og varsler.
+7. Ikke aktiver betalte tjenester, publiser offentlig eller send ekte e-post/push uten min uttrykkelige godkjenning.
+**Leveranser**
+
+- Strukturert og kjørbar kode.
+- README med lokal oppstart, tester og driftsinstruksjoner.
+- .env.example uten hemmeligheter.
+- Databaseoppsett og nødvendige migreringer.
+- Kort dokumentasjon av arkitektur, trafikkilder og varslingslogikk.
+- Tydelig oversikt over hva som fungerer, hva som er demonstrasjon, og hva som krever ekstern tilgang.
+Start med å undersøke prosjektet og trafikkildene, og foreslå den enkleste arkitekturen som kan gi pålitelige varsler.
